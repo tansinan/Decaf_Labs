@@ -81,6 +81,7 @@ WHITESPACE			= ([ \t]+)
 "!="				{ return operator(Parser.NOT_EQUAL);	}
 "&&"				{ return operator(Parser.AND);			}
 "||"				{ return operator(Parser.OR);			}
+"<<"				{ return operator(Parser.PCLONE);		}
 {SIMPLE_OPERATOR}	{ return operator((int)yycharat(0));	}
 {TERNARY_OPERATOR} 	{ return operator((int)yycharat(0));	}
 

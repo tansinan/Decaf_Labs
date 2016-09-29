@@ -31,11 +31,13 @@ import java.util.*;
 %token LITERAL
 %token IDENTIFIER	  AND    OR    STATIC  INSTANCEOF
 %token LESS_EQUAL   GREATER_EQUAL  EQUAL   NOT_EQUAL
+%token PCLONE
 %token '+'  '-'  '*'  '/'  '%'  '='  '>'  '<'  '.'
 %token ','  ';'  '!'  '('  ')'  '['  ']'  '{'  '}'
 %token ':'  '?'
 
 %right  ':' '?'
+%left PCLONE
 %left OR
 %left AND
 %nonassoc EQUAL NOT_EQUAL
@@ -251,6 +253,10 @@ Expr            :	LValue
 				|	Expr '?' Expr ':' Expr
 					{
 						$$.expr = new Tree.Ternary(Tree.CONDITIONAL, $1.expr, $3.expr, $5.expr, $2.loc);
+					}
+				|	Expr PCLONE Expr
+					{
+						$$.expr = new Tree.Binary(Tree.PCLONE, $1.expr, $3.expr, $2.loc);
 					}
                 |	Expr '+' Expr
                 	{
