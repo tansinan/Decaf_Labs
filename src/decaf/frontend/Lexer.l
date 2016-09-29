@@ -10,7 +10,7 @@ package decaf.frontend;
 import decaf.Location;
 import decaf.error.*;
 import decaf.utils.MiscUtils;
- 
+
 %%
 %public
 %class Lexer
@@ -20,7 +20,7 @@ import decaf.utils.MiscUtils;
 %column
 %switch
 %unicode
-	
+
 %{
 	private Location sloc = null;
 	private StringBuilder buffer = new StringBuilder();
@@ -38,6 +38,7 @@ DEC_INTEGER			= ({DIGIT}+)
 INTEGER				= ({HEX_INTEGER}|{DEC_INTEGER})
 IDENTIFIER			= ([A-Za-z][_0-9A-Za-z]*)
 SIMPLE_OPERATOR		= ("+"|"-"|"*"|"/"|"%"|"="|"<"|">"|"."|","|";"|"!"|"("|")"|"["|"]"|"{"|"}")
+TERNARY_OPERATOR 	= ("?"|":")
 S_COMMENT			= ("//"[^\r\n]*{NEWLINE})
 WHITESPACE			= ([ \t]+)
 
@@ -51,7 +52,7 @@ WHITESPACE			= ([ \t]+)
 {S_COMMENT}			{ /* Just ignore */    }
 
 
-	// 识别关键字的规则 
+	// 识别关键字的规则
 "void"				{ return keyword(Parser.VOID);			}
 "int"				{ return keyword(Parser.INT);			}
 "bool"				{ return keyword(Parser.BOOL);			}
@@ -81,12 +82,13 @@ WHITESPACE			= ([ \t]+)
 "&&"				{ return operator(Parser.AND);			}
 "||"				{ return operator(Parser.OR);			}
 {SIMPLE_OPERATOR}	{ return operator((int)yycharat(0));	}
+{TERNARY_OPERATOR} 	{ return operator((int)yycharat(0));	}
 
 	// 识别常数的规则
 "true"				{ return boolConst(true);										}
 "false"				{ return boolConst(false);										}
 {INTEGER}			{ return intConst(yytext());			}
-<YYINITIAL>\"		{ sloc = getLocation();		  
+<YYINITIAL>\"		{ sloc = getLocation();
 					  yybegin(S);
 					  buffer = new StringBuilder();								    }
 <S>{NEWLINE}		{ issueError(new NewlineInStrError(sloc, MiscUtils.quote(buffer.toString())));}
@@ -102,6 +104,6 @@ WHITESPACE			= ([ \t]+)
 
 	// 识别标识符的规则
 {IDENTIFIER}		{ return identifier(yytext());			}
-	
+
 	// 上面规则不能识别的字符怎么处理
 .					{ issueError(new UnrecogCharError(getLocation(), yycharat(0))); 		}

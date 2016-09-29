@@ -221,7 +221,7 @@ public abstract class Tree {
 
     /**
      * Class types, of type TypeClass.
-     */    
+     */
     public static final int TYPECLASS = TYPEIDENT + 1;
 
     /**
@@ -290,14 +290,20 @@ public abstract class Tree {
     public static final int READINTEXPR = THISEXPR + 1;
     public static final int READLINEEXPR = READINTEXPR + 1;
     public static final int PRINT = READLINEEXPR + 1;
-    
+
+    /**
+     * Ternary operators, of type Ternary.
+     */
+
+    public static final int CONDITIONAL = PRINT + 1;
+
     /**
      * Tags for Literal and TypeLiteral
      */
-    public static final int VOID = 0; 
-    public static final int INT = VOID + 1; 
-    public static final int BOOL = INT + 1; 
-    public static final int STRING = BOOL + 1; 
+    public static final int VOID = 0;
+    public static final int INT = VOID + 1;
+    public static final int BOOL = INT + 1;
+    public static final int STRING = BOOL + 1;
 
 
     public Location loc;
@@ -328,7 +334,7 @@ public abstract class Tree {
     public static class TopLevel extends Tree {
 
 		public List<ClassDef> classes;
-		
+
 		public TopLevel(List<ClassDef> classes, Location loc) {
 			super(TOPLEVEL, loc);
 			this.classes = classes;
@@ -351,7 +357,7 @@ public abstract class Tree {
     }
 
     public static class ClassDef extends Tree {
-    	
+
     	public String name;
     	public String parent;
     	public List<Tree> fields;
@@ -368,7 +374,7 @@ public abstract class Tree {
         public void accept(Visitor v) {
             v.visitClassDef(this);
         }
-        
+
     	@Override
     	public void printTo(IndentPrintWriter pw) {
     		pw.println("class " + name + " "
@@ -382,13 +388,13 @@ public abstract class Tree {
    }
 
     public static class MethodDef extends Tree {
-    	
+
     	public boolean statik;
     	public String name;
     	public TypeLiteral returnType;
     	public List<VarDef> formals;
     	public Block body;
-    	
+
         public MethodDef(boolean statik, String name, TypeLiteral returnType,
         		List<VarDef> formals, Block body, Location loc) {
             super(METHODDEF, loc);
@@ -402,7 +408,7 @@ public abstract class Tree {
         public void accept(Visitor v) {
             v.visitMethodDef(this);
         }
-    	
+
     	@Override
     	public void printTo(IndentPrintWriter pw) {
     		if (statik) {
@@ -424,7 +430,7 @@ public abstract class Tree {
     }
 
     public static class VarDef extends Tree {
-    	
+
     	public String name;
     	public TypeLiteral type;
 
@@ -470,7 +476,7 @@ public abstract class Tree {
     public static class Block extends Tree {
 
     	public List<Tree> block;
- 
+
         public Block(List<Tree> block, Location loc) {
             super(BLOCK, loc);
     		this.block = block;
@@ -480,7 +486,7 @@ public abstract class Tree {
         public void accept(Visitor v) {
             v.visitBlock(this);
         }
-    	
+
     	@Override
     	public void printTo(IndentPrintWriter pw) {
     		pw.println("stmtblock");
@@ -573,7 +579,7 @@ public abstract class Tree {
       * An "if ( ) { } else { }" block
       */
     public static class If extends Tree {
-    	
+
     	public Expr condition;
     	public Tree trueBranch;
     	public Tree falseBranch;
@@ -713,7 +719,7 @@ public abstract class Tree {
 
     	public boolean isClass;
     	public boolean usedForRef;
-    	
+
     	public Expr(int tag, Location loc) {
     		super(tag, loc);
     	}
@@ -750,7 +756,7 @@ public abstract class Tree {
     		} else {
     			pw.println("<empty>");
     		}
-    		
+
     		for (Expr e : actuals) {
     			e.printTo(pw);
     		}
@@ -817,7 +823,7 @@ public abstract class Tree {
     		LOCAL_VAR, PARAM_VAR, MEMBER_VAR, ARRAY_ELEMENT
     	}
     	public Kind lvKind;
-    	
+
     	LValue(int tag, Location loc) {
     		super(tag, loc);
     	}
@@ -962,6 +968,39 @@ public abstract class Tree {
     	}
     }
 
+    /**
+      * A ternary operation.
+      * Currently the only ternary operation supported is ?: expression.
+      */
+    public static class Ternary extends Expr {
+
+    	public Expr condition;
+        public Expr left;
+    	public Expr right;
+
+        public Ternary(int kind, Expr condition, Expr left, Expr right, Location loc) {
+            super(kind, loc);
+            this.condition = condition;
+    		this.left = left;
+    		this.right = right;
+        }
+
+    	@Override
+    	public void accept(Visitor visitor) {
+    		visitor.visitTernary(this);
+    	}
+
+    	@Override
+    	public void printTo(IndentPrintWriter pw) {
+            pw.println("conditional-expression");
+    		pw.incIndent();
+            condition.printTo(pw);
+    		left.printTo(pw);
+    		right.printTo(pw);
+    		pw.decIndent();
+    	}
+    }
+
     public static class CallExpr extends Expr {
 
     	public Expr receiver;
@@ -994,7 +1033,7 @@ public abstract class Tree {
     		} else {
     			pw.println("<empty>");
     		}
-    		
+
     		for (Expr e : actuals) {
     			e.printTo(pw);
     		}
@@ -1086,7 +1125,7 @@ public abstract class Tree {
       * instanceof expression
       */
     public static class TypeTest extends Expr {
-    	
+
     	public Expr instance;
     	public String className;
 
@@ -1223,19 +1262,19 @@ public abstract class Tree {
     }
 
     public static abstract class TypeLiteral extends Tree {
-    	
+
     	public TypeLiteral(int tag, Location loc){
     		super(tag, loc);
     	}
     }
-    
+
     /**
       * Identifies a basic type.
       * @param tag the basic type id
       * @see SemanticConstants
       */
     public static class TypeIdent extends TypeLiteral {
-    	
+
         public int typeTag;
 
         public TypeIdent(int typeTag, Location loc) {
@@ -1388,6 +1427,10 @@ public abstract class Tree {
         }
 
         public void visitBinary(Binary that) {
+            visitTree(that);
+        }
+
+        public void visitTernary(Ternary that) {
             visitTree(that);
         }
 
