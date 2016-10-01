@@ -26,6 +26,7 @@ import java.util.*;
 
 %token VOID   BOOL  INT   STRING  CLASS
 %token NULL   EXTENDS     THIS     WHILE   FOR
+%token REPEAT UNTIL
 %token IF     ELSE        RETURN   BREAK   NEW
 %token SWITCH CASE        DEFAULT
 %token PRINT  READ_INTEGER         READ_LINE
@@ -197,6 +198,7 @@ Stmt		    :	VariableDef
 				|   SwitchStmt
                 |	WhileStmt
                 |	ForStmt
+				|	RepeatStmt ';'
                 |	ReturnStmt ';'
                 |	PrintStmt ';'
                 |	BreakStmt ';'
@@ -427,6 +429,12 @@ ForStmt         :	FOR '(' SimpleStmt ';' Expr ';'	SimpleStmt ')' Stmt
 						$$.stmt = new Tree.ForLoop($3.stmt, $5.expr, $7.stmt, $9.stmt, $1.loc);
 					}
                 ;
+
+RepeatStmt      :   REPEAT Stmt UNTIL '(' Expr ')'
+					{
+						$$.stmt = new Tree.RepeatLoop($2.stmt, $5.expr, $1.loc);
+					}
+				;
 
 BreakStmt       :	BREAK
 					{

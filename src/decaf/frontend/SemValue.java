@@ -141,6 +141,12 @@ public class SemValue {
 		case Parser.FOR:
 			msg = "keyword  : for";
 			break;
+		case Parser.REPEAT:
+			msg = "keyword  : repeat";
+			break;
+		case Parser.UNTIL:
+			msg = "keyword  : until";
+			break;
 		case Parser.SWITCH:
 			msg = "keyword  : switch";
 			break;
