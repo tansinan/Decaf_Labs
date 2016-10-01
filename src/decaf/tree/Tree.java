@@ -788,6 +788,26 @@ public abstract class Tree {
     }
 
     /**
+      * A break from a loop.
+      */
+    public static class Continue extends Tree {
+
+        public Continue(Location loc) {
+            super(CONTINUE, loc);
+        }
+
+    	@Override
+        public void accept(Visitor v) {
+            v.visitContinue(this);
+        }
+
+    	@Override
+    	public void printTo(IndentPrintWriter pw) {
+    		pw.println("continue");
+    	}
+    }
+
+    /**
       * A return statement.
       */
     public static class Print extends Tree {
@@ -1546,6 +1566,10 @@ public abstract class Tree {
         }
 
         public void visitBreak(Break that) {
+            visitTree(that);
+        }
+
+        public void visitContinue(Continue that) {
             visitTree(that);
         }
 

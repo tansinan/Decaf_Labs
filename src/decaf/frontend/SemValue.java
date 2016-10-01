@@ -129,6 +129,9 @@ public class SemValue {
 		case Parser.BREAK:
 			msg = "keyword  : break";
 			break;
+		case Parser.CONTINUE:
+			msg = "keyword  : continue";
+			break;
 		case Parser.CLASS:
 			msg = "keyword  : class";
 			break;

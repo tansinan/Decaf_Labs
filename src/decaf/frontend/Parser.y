@@ -28,7 +28,7 @@ import java.util.*;
 %token NULL   EXTENDS     THIS     WHILE   FOR
 %token REPEAT UNTIL
 %token IF     ELSE        RETURN   BREAK   NEW
-%token SWITCH CASE        DEFAULT
+%token SWITCH CASE        DEFAULT  CONTINUE
 %token PRINT  READ_INTEGER         READ_LINE
 %token LITERAL
 %token IDENTIFIER	  AND    OR    STATIC  INSTANCEOF
@@ -202,6 +202,7 @@ Stmt		    :	VariableDef
                 |	ReturnStmt ';'
                 |	PrintStmt ';'
                 |	BreakStmt ';'
+                |	ContinueStmt ';'
                 |	StmtBlock
                 ;
 
@@ -439,6 +440,12 @@ RepeatStmt      :   REPEAT Stmt UNTIL '(' Expr ')'
 BreakStmt       :	BREAK
 					{
 						$$.stmt = new Tree.Break($1.loc);
+					}
+                ;
+
+ContinueStmt    :	CONTINUE
+					{
+						$$.stmt = new Tree.Continue($1.loc);
 					}
                 ;
 
