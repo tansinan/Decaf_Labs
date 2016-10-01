@@ -27,6 +27,7 @@ import java.util.*;
 %token VOID   BOOL  INT   STRING  CLASS
 %token NULL   EXTENDS     THIS     WHILE   FOR
 %token IF     ELSE        RETURN   BREAK   NEW
+%token SWITCH CASE        DEFAULT
 %token PRINT  READ_INTEGER         READ_LINE
 %token LITERAL
 %token IDENTIFIER	  AND    OR    STATIC  INSTANCEOF
@@ -193,6 +194,7 @@ Stmt		    :	VariableDef
                 		}
                 	}
                 |	IfStmt
+				|   SwitchStmt
                 |	WhileStmt
                 |	ForStmt
                 |	ReturnStmt ';'
@@ -379,6 +381,39 @@ ExprList        :	ExprList ',' Expr
                 		$$.elist = new ArrayList<Tree.Expr>();
 						$$.elist.add($1.expr);
                 	}
+                ;
+
+CaseStmt        :  CASE Constant ':' StmtList
+					{
+						$$.stmt = new Tree.Case($2.expr, $4.slist, $1.loc);
+					}
+				;
+
+CaseList        :	CaseList CaseStmt
+					{
+						$$.caselist.add((Tree.Case)$2.stmt);
+					}
+                |	/* empty */
+                	{
+                		$$ = new SemValue();
+                		$$.caselist = new ArrayList<Tree.Case>();
+                	}
+                ;
+
+DefaultStmt     :  DEFAULT ':' StmtList
+					{
+						$$.stmt = new Tree.Default($3.slist, $1.loc);
+					}
+				;
+
+SwitchStmt      :	SWITCH '(' Expr ')' '{' CaseList '}'
+					{
+						$$.stmt = new Tree.Switch($3.expr, $6.caselist, $1.loc);
+					}
+				|	SWITCH '(' Expr ')' '{' CaseList DefaultStmt '}'
+					{
+						$$.stmt = new Tree.Switch($3.expr, $6.caselist, $7.stmt, $1.loc);
+					}
                 ;
 
 WhileStmt       :	WHILE '(' Expr ')' Stmt

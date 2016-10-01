@@ -105,9 +105,14 @@ public abstract class Tree {
     public static final int CASE = SWITCH + 1;
 
     /**
+     * Default parts in switch statements, of type Default.
+     */
+    public static final int DEFAULT = CASE + 1;
+
+    /**
      * Synchronized statements, of type Synchonized.
      */
-    public static final int SYNCHRONIZED = CASE + 1;
+    public static final int SYNCHRONIZED = DEFAULT + 1;
 
     /**
      * Try statements, of type Try.
@@ -497,6 +502,97 @@ public abstract class Tree {
     		}
     		pw.decIndent();
     	}
+    }
+
+    public static class Case extends Tree {
+
+        public Literal constant;
+    	public List<Tree> statements;
+
+        public Case(Expr constant, List<Tree> statements, Location loc) {
+            super(CASE, loc);
+            this.constant = (Literal)constant;
+    		this.statements = statements;
+        }
+
+    	@Override
+        public void accept(Visitor v) {
+            v.visitCase(this);
+        }
+
+    	@Override
+    	public void printTo(IndentPrintWriter pw) {
+    		pw.println("case:");
+    		pw.incIndent();
+            constant.printTo(pw);
+    		for (Tree s : statements) {
+    			s.printTo(pw);
+    		}
+    		pw.decIndent();
+    	}
+    }
+
+    public static class Default extends Tree {
+
+        public List<Tree> statements;
+
+        public Default(List<Tree> statements, Location loc) {
+            super(DEFAULT, loc);
+            this.statements = statements;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitDefault(this);
+        }
+
+        @Override
+        public void printTo(IndentPrintWriter pw) {
+            pw.println("default:");
+            for (Tree s : statements) {
+                s.printTo(pw);
+            }
+        }
+    }
+
+    public static class Switch extends Tree {
+
+        public Expr value;
+        public List<Case> caseBlocks;
+        public Default defaultBlock;
+
+        public Switch(Expr value, List<Case> caseBlocks, Location loc) {
+            super(SWITCH, loc);
+            this.value = value;
+            this.caseBlocks = caseBlocks;
+            this.defaultBlock = null;
+        }
+
+        public Switch(Expr value, List<Case> caseBlocks, Tree defaultBlock, Location loc) {
+            super(SWITCH, loc);
+            this.value = value;
+            this.caseBlocks = caseBlocks;
+            this.defaultBlock = (Default)defaultBlock;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitSwitch(this);
+        }
+
+        @Override
+        public void printTo(IndentPrintWriter pw) {
+            pw.println("switch");
+            pw.incIndent();
+            value.printTo(pw);
+            for (Case c : caseBlocks) {
+                c.printTo(pw);
+            }
+            if (defaultBlock != null) {
+                defaultBlock.printTo(pw);
+            }
+            pw.decIndent();
+        }
     }
 
     /**
@@ -1383,6 +1479,18 @@ public abstract class Tree {
         }
 
         public void visitBlock(Block that) {
+            visitTree(that);
+        }
+
+        public void visitCase(Case that) {
+            visitTree(that);
+        }
+
+        public void visitDefault(Default that) {
+            visitTree(that);
+        }
+
+        public void visitSwitch(Switch that) {
             visitTree(that);
         }
 
