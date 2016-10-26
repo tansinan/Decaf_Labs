@@ -4,4 +4,4 @@ result/bin/
 *.output
 output/
 submit.zip
-*.jar
+decaf.jar
