@@ -452,6 +452,7 @@ public class Parser extends BaseParser  {
             case RETURN:
             case PRINT:
             case BREAK:
+            case CONTINUE:
             case '{':
             {
                 SemValue[] params = new SemValue[3];
@@ -574,6 +575,15 @@ public class Parser extends BaseParser  {
                 SemValue[] params = new SemValue[3];
                 params[0] = new SemValue();
                 params[1] = BreakStmtParse();
+                params[2] = MatchToken(';');
+                params[0].stmt = params[1].stmt;
+                return params[0];
+            }
+            case CONTINUE:
+            {
+                SemValue[] params = new SemValue[3];
+                params[0] = new SemValue();
+                params[1] = ContinueStmtParse();
                 params[2] = MatchToken(';');
                 params[0].stmt = params[1].stmt;
                 return params[0];
@@ -1656,6 +1666,14 @@ public class Parser extends BaseParser  {
         params[8] = MatchToken(')');
         params[9] = StmtParse();
         params[0].stmt = new Tree.ForLoop(params[3].stmt, params[5].expr, params[7].stmt, params[9].stmt, params[1].loc);
+        return params[0];
+    }
+
+    private SemValue ContinueStmtParse() {
+        SemValue[] params = new SemValue[2];
+        params[0] = new SemValue();
+        params[1] = MatchToken(CONTINUE);
+        params[0].stmt = new Tree.Continue(params[1].loc);
         return params[0];
     }
 

@@ -150,9 +150,14 @@ public abstract class Tree {
     public static final int BREAK = EXEC + 1;
 
     /**
+     * Continue statements, of type Continue.
+     */
+    public static final int CONTINUE = BREAK + 1;
+
+    /**
      * Return statements, of type Return.
      */
-    public static final int RETURN = BREAK + 1;
+    public static final int RETURN = CONTINUE + 1;
 
     /**
      * Throw statements, of type Throw.
@@ -775,6 +780,26 @@ public abstract class Tree {
         @Override
         public void printTo(IndentPrintWriter pw) {
             pw.println("break");
+        }
+    }
+
+    /**
+     * A continue in a loop.
+     */
+    public static class Continue extends Tree {
+
+        public Continue(Location loc) {
+            super(CONTINUE, loc);
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitContinue(this);
+        }
+
+        @Override
+        public void printTo(IndentPrintWriter pw) {
+            pw.println("continue");
         }
     }
 
@@ -1533,6 +1558,10 @@ public abstract class Tree {
         }
 
         public void visitBreak(Break that) {
+            visitTree(that);
+        }
+
+        public void visitContinue(Continue that) {
             visitTree(that);
         }
 
