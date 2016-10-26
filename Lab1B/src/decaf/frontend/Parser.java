@@ -47,6 +47,7 @@ public class Parser extends BaseParser  {
     public static final int GREATER_EQUAL = 289;
     public static final int EQUAL = 290;
     public static final int NOT_EQUAL = 291;
+    public static final int PCLONE = 292;
 
     public void error(String error) {
         yyerror(error);
@@ -797,9 +798,75 @@ public class Parser extends BaseParser  {
     private SemValue ExprParse() {
         SemValue[] params = new SemValue[2];
         params[0] = new SemValue();
-        params[1] = Expr2Parse();
+        params[1] = Expr1Parse();
         params[0].expr = params[1].expr;
         return params[0];
+    }
+
+    private SemValue TernaryParse() {
+        
+    }
+
+    private SemValue Oper1Parse() {
+        switch (lookahead) {
+            case PCLONE:
+            {
+                SemValue[] params = new SemValue[2];
+                params[0] = new SemValue();
+                params[1] = MatchToken(PCLONE);
+                params[0].signal = Tree.PCLONE;
+                params[0].loc = params[1].loc;
+                return params[0];
+            }
+            default:
+                return new SemValue();
+        }
+    }
+
+    private SemValue Expr1Parse() {
+        SemValue[] params = new SemValue[3];
+        params[0] = new SemValue();
+        params[1] = Expr2Parse();
+        params[2] = ExprT1Parse();
+        params[0].expr = params[1].expr;
+        if (params[2].svec != null) {
+            for (int i = 0; i < params[2].svec.size(); ++i) {
+                params[0].expr = new Tree.Binary(params[2].svec.get(i), params[0].expr, params[2].evec.get(i), params[2].lvec.get(i));
+            }
+        };
+        return params[0];
+    }
+
+    private SemValue ExprT1Parse() {
+        switch (lookahead) {
+            case PCLONE:
+            {
+                SemValue[] params = new SemValue[4];
+                params[0] = new SemValue();
+                params[1] = Oper1Parse();
+                params[2] = Expr2Parse();
+                params[3] = ExprT1Parse();
+                params[0].svec = new Vector<Integer>();
+                params[0].lvec = new Vector<Location>();
+                params[0].evec = new Vector<Expr>();
+                params[0].svec.add(params[1].signal);
+                params[0].lvec.add(params[1].loc);
+                params[0].evec.add(params[2].expr);
+                if (params[3].svec != null) {
+                    params[0].svec.addAll(params[3].svec);
+                    params[0].lvec.addAll(params[3].lvec);
+                    params[0].evec.addAll(params[3].evec);
+                };
+                return params[0];
+            }
+            default:
+            {
+                SemValue[] params = new SemValue[1];
+                params[0] = new SemValue();
+                // no actions;
+                return params[0];
+            }
+        }
     }
 
     private SemValue Expr2Parse() {
