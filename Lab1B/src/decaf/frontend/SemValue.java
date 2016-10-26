@@ -47,6 +47,8 @@ public class SemValue {
 	 */
 	public List<Tree> slist = new ArrayList<Tree>();
 
+	public List<Tree.Case> caselist = new ArrayList<Tree.Case>();
+
 	public List<Expr> elist;
 
 	public TopLevel prog;

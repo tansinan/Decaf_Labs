@@ -68,6 +68,10 @@ WHITESPACE			= ([ \t]+)
 "else"				{ return keyword(Parser.ELSE);			}
 "return"			{ return keyword(Parser.RETURN);		}
 "break"				{ return keyword(Parser.BREAK);			}
+"continue"			{ return keyword(Parser.CONTINUE);		}
+"switch"			{ return keyword(Parser.SWITCH);		}
+"case"				{ return keyword(Parser.CASE);			}
+"default"			{ return keyword(Parser.DEFAULT);		}
 "Print"				{ return keyword(Parser.PRINT);			}
 "ReadInteger"		{ return keyword(Parser.READ_INTEGER);	}
 "ReadLine"			{ return keyword(Parser.READ_LINE);		}

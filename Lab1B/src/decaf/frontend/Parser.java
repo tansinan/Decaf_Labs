@@ -48,6 +48,10 @@ public class Parser extends BaseParser  {
     public static final int EQUAL = 290;
     public static final int NOT_EQUAL = 291;
     public static final int PCLONE = 292;
+    public static final int SWITCH = 293;
+    public static final int CASE = 294;
+    public static final int DEFAULT = 295;
+    public static final int CONTINUE = 296;
 
     public void error(String error) {
         yyerror(error);
@@ -439,6 +443,7 @@ public class Parser extends BaseParser  {
             case IDENTIFIER:
             case ';':
             case IF:
+            case SWITCH:
             case WHILE:
             case FOR:
             case RETURN:
@@ -507,6 +512,14 @@ public class Parser extends BaseParser  {
                 SemValue[] params = new SemValue[2];
                 params[0] = new SemValue();
                 params[1] = IfStmtParse();
+                params[0].stmt = params[1].stmt;
+                return params[0];
+            }
+            case SWITCH:
+            {
+                SemValue[] params = new SemValue[2];
+                params[0] = new SemValue();
+                params[1] = SwitchStmtParse();
                 params[0].stmt = params[1].stmt;
                 return params[0];
             }
@@ -1628,6 +1641,59 @@ public class Parser extends BaseParser  {
         params[1] = MatchToken(BREAK);
         params[0].stmt = new Tree.Break(params[1].loc);
         return params[0];
+    }
+
+    private SemValue CaseParse() {
+        SemValue ret = new SemValue();
+        SemValue caseTag = MatchToken(CASE);
+        SemValue constant = ConstantParse();
+        MatchToken(':');
+        SemValue statementList = StmtListParse();
+        ret.loc = caseTag.loc;
+        ret.stmt = new Tree.Case(constant.expr, statementList.slist, caseTag.loc);
+        return ret;
+    }
+
+
+    private SemValue SwitchStmtParse() {
+        SemValue ret = new SemValue();
+        SemValue switchTag = MatchToken(SWITCH);
+        ret.loc = switchTag.loc;
+        MatchToken('(');
+        SemValue expr = ExprParse();
+        MatchToken(')');
+        MatchToken('{');
+        SemValue caseList = CaseListParse();
+        SemValue defaultBlock = new SemValue();
+        if(lookahead == DEFAULT)
+            defaultBlock = DefaultParse();
+        MatchToken('}');
+        ret.stmt = new Tree.Switch(expr.expr, caseList.caselist, defaultBlock.stmt, ret.loc);
+        return ret;
+    }
+
+    private SemValue CaseListParse() {
+        SemValue ret = new SemValue();
+        if(lookahead == CASE)
+        {
+            SemValue[] params = new SemValue[2];
+            params[0] = CaseParse();
+            params[1] = CaseListParse();
+            ret.loc = params[0].loc;
+            ret.caselist.add((Case)params[0].stmt);
+            ret.caselist.addAll(params[1].caselist);
+        }
+        return ret;
+    }
+
+    private SemValue DefaultParse() {
+        SemValue ret = new SemValue();
+        SemValue defaultTag = MatchToken(DEFAULT);
+        MatchToken(':');
+        SemValue statementList = StmtListParse();
+        ret.loc = defaultTag.loc;
+        ret.stmt = new Tree.Default(statementList.slist, defaultTag.loc);
+        return ret;
     }
 
     private SemValue IfStmtParse() {
