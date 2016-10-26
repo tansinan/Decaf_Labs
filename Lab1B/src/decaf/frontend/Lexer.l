@@ -83,6 +83,7 @@ WHITESPACE			= ([ \t]+)
 "||"				{ return operator(Parser.OR);			}
 "<<"				{ return operator(Parser.PCLONE);		}
 {SIMPLE_OPERATOR}	{ return operator((int)yycharat(0));	}
+{TERNARY_OPERATOR} 	{ return operator((int)yycharat(0));	}
 
 	// 识别常数的规则
 "true"				{ return boolConst(true);										}

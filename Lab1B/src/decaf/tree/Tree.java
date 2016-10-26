@@ -269,8 +269,9 @@ public abstract class Tree {
     public static final int DIV = MUL + 1;
     public static final int MOD = DIV + 1;
     public static final int PCLONE = MOD + 1;
+    public static final int TERNARY = PCLONE + 1;
 
-    public static final int NULL = PCLONE + 1;
+    public static final int NULL = TERNARY + 1;
     public static final int CALLEXPR = NULL + 1;
     public static final int THISEXPR = CALLEXPR + 1;
     public static final int READINTEXPR = THISEXPR + 1;
@@ -950,6 +951,35 @@ public abstract class Tree {
         }
     }
 
+    public static class Ternary extends Expr {
+
+        public Expr condition;
+        public Expr left;
+        public Expr right;
+
+        public Ternary(int kind, Expr condition, Expr left, Expr right, Location loc) {
+            super(kind, loc);
+            this.condition = condition;
+            this.left = left;
+            this.right = right;
+        }
+
+        @Override
+        public void accept(Visitor visitor) {
+            visitor.visitTernary(this);
+        }
+
+        @Override
+        public void printTo(IndentPrintWriter pw) {
+            pw.println("conditional-expression");
+            pw.incIndent();
+            condition.printTo(pw);
+            left.printTo(pw);
+            right.printTo(pw);
+            pw.decIndent();
+        }
+    }
+
     public static class CallExpr extends Expr {
 
         public Expr receiver;
@@ -1376,6 +1406,10 @@ public abstract class Tree {
         }
 
         public void visitBinary(Binary that) {
+            visitTree(that);
+        }
+
+        public void visitTernary(Ternary that) {
             visitTree(that);
         }
 

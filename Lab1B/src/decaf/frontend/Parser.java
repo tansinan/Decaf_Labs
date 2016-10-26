@@ -798,13 +798,26 @@ public class Parser extends BaseParser  {
     private SemValue ExprParse() {
         SemValue[] params = new SemValue[2];
         params[0] = new SemValue();
-        params[1] = Expr1Parse();
+        params[1] = TernaryParse();
         params[0].expr = params[1].expr;
         return params[0];
     }
 
     private SemValue TernaryParse() {
-        
+        SemValue ret = new SemValue();
+        SemValue[] params = new SemValue[3];
+        params[0] = Expr1Parse();
+        if(lookahead != '?')
+        {
+            ret.expr = params[0].expr;
+            return ret;
+        }
+        SemValue op = MatchToken('?');
+        params[1] = TernaryParse();
+        MatchToken(':');
+        params[2] = TernaryParse();
+        ret.expr = new Tree.Ternary(Tree.TERNARY, params[0].expr, params[1].expr, params[2].expr, op.loc);
+        return ret;
     }
 
     private SemValue Oper1Parse() {
