@@ -51,7 +51,9 @@ public class Parser extends BaseParser  {
     public static final int SWITCH = 293;
     public static final int CASE = 294;
     public static final int DEFAULT = 295;
-    public static final int CONTINUE = 296;
+    public static final int REPEAT = 296;
+    public static final int UNTIL = 297;
+    public static final int CONTINUE = 298;
 
     public void error(String error) {
         yyerror(error);
@@ -446,6 +448,7 @@ public class Parser extends BaseParser  {
             case SWITCH:
             case WHILE:
             case FOR:
+            case REPEAT:
             case RETURN:
             case PRINT:
             case BREAK:
@@ -536,6 +539,15 @@ public class Parser extends BaseParser  {
                 SemValue[] params = new SemValue[2];
                 params[0] = new SemValue();
                 params[1] = ForStmtParse();
+                params[0].stmt = params[1].stmt;
+                return params[0];
+            }
+            case REPEAT:
+            {
+                SemValue[] params = new SemValue[3];
+                params[0] = new SemValue();
+                params[1] = RepeatStmtParse();
+                params[2] = MatchToken(';');
                 params[0].stmt = params[1].stmt;
                 return params[0];
             }
@@ -1605,6 +1617,18 @@ public class Parser extends BaseParser  {
                 return params[0];
             }
         }
+    }
+
+    private SemValue RepeatStmtParse() {
+        SemValue ret = new SemValue();
+        SemValue repeatTag = MatchToken(REPEAT);
+        SemValue statement = StmtParse();
+        MatchToken(UNTIL);
+        MatchToken('(');
+        SemValue expr = ExprParse();
+        MatchToken(')');
+        ret.stmt = new Tree.RepeatLoop(statement.stmt, expr.expr, repeatTag.loc);
+        return ret;
     }
 
     private SemValue WhileStmtParse() {

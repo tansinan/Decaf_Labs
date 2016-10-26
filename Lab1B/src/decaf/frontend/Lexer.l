@@ -64,6 +64,8 @@ WHITESPACE			= ([ \t]+)
 "this"				{ return keyword(Parser.THIS);			}
 "while"				{ return keyword(Parser.WHILE);			}
 "for"				{ return keyword(Parser.FOR);			}
+"repeat"			{ return keyword(Parser.REPEAT);		}
+"until"				{ return keyword(Parser.UNTIL);			}
 "if"				{ return keyword(Parser.IF);			}
 "else"				{ return keyword(Parser.ELSE);			}
 "return"			{ return keyword(Parser.RETURN);		}

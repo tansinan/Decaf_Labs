@@ -90,9 +90,14 @@ public abstract class Tree {
     public static final int FORLOOP = WHILELOOP + 1;
 
     /**
+     * Repeat-loops, of type RepeatLoop.
+     */
+    public static final int REPEATLOOP = FORLOOP + 1;
+
+    /**
      * Labelled statements, of type Labelled.
      */
-    public static final int LABELLED = FORLOOP + 1;
+    public static final int LABELLED = REPEATLOOP + 1;
 
     /**
      * Switch statements, of type Switch.
@@ -661,6 +666,33 @@ public abstract class Tree {
             pw.decIndent();
         }
     }
+
+    public static class RepeatLoop extends Tree {
+
+        public Tree statement;
+        public Expr condition;
+
+        public RepeatLoop(Tree statement, Expr condition, Location loc) {
+            super(REPEATLOOP, loc);
+            this.statement = statement;
+            this.condition = condition;
+        }
+
+        @Override
+        public void accept(Visitor v) {
+            v.visitRepeatLoop(this);
+        }
+
+        @Override
+        public void printTo(IndentPrintWriter pw) {
+            pw.println("repeat");
+            pw.incIndent();
+            condition.printTo(pw);
+            statement.printTo(pw);
+            pw.decIndent();
+        }
+    }
+
 
     /**
      * An "if ( ) { } else { }" block
@@ -1485,6 +1517,10 @@ public abstract class Tree {
         }
 
         public void visitForLoop(ForLoop that) {
+            visitTree(that);
+        }
+
+        public void visitRepeatLoop(RepeatLoop that) {
             visitTree(that);
         }
 
