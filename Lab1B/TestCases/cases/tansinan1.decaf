@@ -1,0 +1,12 @@
+class Test {
+
+    int foo(int x, int y, int z) {
+		int p;
+		int q;
+		int r;
+		p = x > 0 ? y:z<0?z:(z>0 + y?9:7<x + 7?8:0) > 5?88:11;
+		q = x << y << z << (z<0?z:y) <<  z / b << (a*b << 7 * d);
+		r = x << y << x > 0 ? y:z<0?z:(z>0 + y?9:7<x + 7?8:0) << (z<0?z:y) << y / z && b  << (a*b << 7 + d);
+        return (p + q + r)/3;
+    }
+}

@@ -1,0 +1,129 @@
+program
+    class Test <empty>
+        func foo inttype
+            formals
+                vardef x inttype
+                vardef y inttype
+                vardef z inttype
+            stmtblock
+                vardef p inttype
+                vardef q inttype
+                vardef r inttype
+                assign
+                    varref p
+                    conditional-expression
+                        gtr
+                            varref x
+                            intconst 0
+                        varref y
+                        conditional-expression
+                            les
+                                varref z
+                                intconst 0
+                            varref z
+                            conditional-expression
+                                gtr
+                                    conditional-expression
+                                        gtr
+                                            varref z
+                                            add
+                                                intconst 0
+                                                varref y
+                                        intconst 9
+                                        conditional-expression
+                                            les
+                                                intconst 7
+                                                add
+                                                    varref x
+                                                    intconst 7
+                                            intconst 8
+                                            intconst 0
+                                    intconst 5
+                                intconst 88
+                                intconst 11
+                assign
+                    varref q
+                    pclone
+                        pclone
+                            pclone
+                                pclone
+                                    pclone
+                                        varref x
+                                        varref y
+                                    varref z
+                                conditional-expression
+                                    les
+                                        varref z
+                                        intconst 0
+                                    varref z
+                                    varref y
+                            div
+                                varref z
+                                varref b
+                        pclone
+                            mul
+                                varref a
+                                varref b
+                            mul
+                                intconst 7
+                                varref d
+                assign
+                    varref r
+                    conditional-expression
+                        pclone
+                            pclone
+                                varref x
+                                varref y
+                            gtr
+                                varref x
+                                intconst 0
+                        varref y
+                        conditional-expression
+                            les
+                                varref z
+                                intconst 0
+                            varref z
+                            pclone
+                                pclone
+                                    pclone
+                                        conditional-expression
+                                            gtr
+                                                varref z
+                                                add
+                                                    intconst 0
+                                                    varref y
+                                            intconst 9
+                                            conditional-expression
+                                                les
+                                                    intconst 7
+                                                    add
+                                                        varref x
+                                                        intconst 7
+                                                intconst 8
+                                                intconst 0
+                                        conditional-expression
+                                            les
+                                                varref z
+                                                intconst 0
+                                            varref z
+                                            varref y
+                                    and
+                                        div
+                                            varref y
+                                            varref z
+                                        varref b
+                                pclone
+                                    mul
+                                        varref a
+                                        varref b
+                                    add
+                                        intconst 7
+                                        varref d
+                return
+                    div
+                        add
+                            add
+                                varref p
+                                varref q
+                            varref r
+                        intconst 3

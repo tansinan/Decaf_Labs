@@ -57,5 +57,33 @@ program
                                             intconst 4
                                         intconst 0
                                     continue
+                                switch
+                                    add
+                                        add
+                                            varref a
+                                            varref b
+                                        varref c
+                                    case:
+                                        intconst 0
+                                    case:
+                                        intconst 1
+                                        repeat
+                                            conditional-expression
+                                                equ
+                                                    varref a
+                                                    intconst 1
+                                                conditional-expression
+                                                    varref a
+                                                    varref b
+                                                    varref c
+                                                add
+                                                    varref b
+                                                    varref c
+                                            assign
+                                                varref a
+                                                add
+                                                    varref a
+                                                    intconst 1
+                                        break
                 return
                     intconst 0
