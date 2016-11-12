@@ -20,9 +20,9 @@ public class SemValue {
 	public Location loc;
 
 	public int typeTag;
-	
+
 	public Object literal;
-	
+
 	public String ident;
 
 	public List<ClassDef> clist;
@@ -34,6 +34,7 @@ public class SemValue {
 
 	public List<VarDef> vlist;
 
+	public List<Tree.Case> caselist;
 
 	/**
 	 * statement list
@@ -60,7 +61,7 @@ public class SemValue {
 
 	/**
 	 * 创建一个关键字的语义值
-	 * 
+	 *
 	 * @param code
 	 *            关键字的代表码
 	 * @return 对应关键字的语义值
@@ -73,7 +74,7 @@ public class SemValue {
 
 	/**
 	 * 创建一个操作符的语义值
-	 * 
+	 *
 	 * @param code
 	 *            操作符的代表码
 	 * @return 对应操作符的语义值
@@ -86,7 +87,7 @@ public class SemValue {
 
 	/**
 	 * 创建一个常量的语义值
-	 * 
+	 *
 	 * @param value
 	 *            常量的值
 	 * @return 对应的语义值
@@ -101,7 +102,7 @@ public class SemValue {
 
 	/**
 	 * 创建一个标识符的语义值
-	 * 
+	 *
 	 * @param name
 	 *            标识符的名字
 	 * @return 对应的语义值（标识符名字存放在sval域）
@@ -115,7 +116,7 @@ public class SemValue {
 
 	/**
 	 * 获取这个语义值的字符串表示<br>
-	 * 
+	 *
 	 * 我们建议你在构造词法分析器之前先阅读一下这个函数。
 	 */
 	public String toString() {
@@ -128,6 +129,9 @@ public class SemValue {
 		case Parser.BREAK:
 			msg = "keyword  : break";
 			break;
+		case Parser.CONTINUE:
+			msg = "keyword  : continue";
+			break;
 		case Parser.CLASS:
 			msg = "keyword  : class";
 			break;
@@ -139,6 +143,21 @@ public class SemValue {
 			break;
 		case Parser.FOR:
 			msg = "keyword  : for";
+			break;
+		case Parser.REPEAT:
+			msg = "keyword  : repeat";
+			break;
+		case Parser.UNTIL:
+			msg = "keyword  : until";
+			break;
+		case Parser.SWITCH:
+			msg = "keyword  : switch";
+			break;
+		case Parser.CASE:
+			msg = "keyword  : case";
+			break;
+		case Parser.DEFAULT:
+			msg = "keyword  : default";
 			break;
 		case Parser.IF:
 			msg = "keyword  : if";
@@ -194,7 +213,7 @@ public class SemValue {
 				msg = "constant : " + MiscUtils.quote((String)literal);
 			}
 			break;
-			
+
 		// 标识符
 		case Parser.IDENTIFIER:
 			msg = "identifier: " + ident;

@@ -2,11 +2,11 @@
  * 本文件提供实现Decaf编译器所需要的BYACC脚本。
  * 在第一阶段中你需要补充完整这个文件中的语法规则。
  * 请参考"YACC--Yet Another Compiler Compiler"中关于如何编写BYACC脚本的说明。
- * 
+ *
  * Keltin Leung
  * DCST, Tsinghua University
  */
- 
+
 %{
 package decaf.frontend;
 
@@ -24,24 +24,30 @@ import java.util.*;
 %Jnodebug
 %Jnoconstruct
 
-%token VOID   BOOL  INT   STRING  CLASS 
-%token NULL   EXTENDS     THIS     WHILE   FOR   
+%token VOID   BOOL  INT   STRING  CLASS
+%token NULL   EXTENDS     THIS     WHILE   FOR
+%token REPEAT UNTIL
 %token IF     ELSE        RETURN   BREAK   NEW
+%token SWITCH CASE        DEFAULT  CONTINUE
 %token PRINT  READ_INTEGER         READ_LINE
 %token LITERAL
 %token IDENTIFIER	  AND    OR    STATIC  INSTANCEOF
 %token LESS_EQUAL   GREATER_EQUAL  EQUAL   NOT_EQUAL
+%token PCLONE
 %token '+'  '-'  '*'  '/'  '%'  '='  '>'  '<'  '.'
 %token ','  ';'  '!'  '('  ')'  '['  ']'  '{'  '}'
+%token ':'  '?'
 
+%right  ':' '?'
+%left PCLONE
 %left OR
-%left AND 
+%left AND
 %nonassoc EQUAL NOT_EQUAL
 %nonassoc LESS_EQUAL GREATER_EQUAL '<' '>'
 %left  '+' '-'
-%left  '*' '/' '%'  
-%nonassoc UMINUS '!' 
-%nonassoc '[' '.' 
+%left  '*' '/' '%'
+%nonassoc UMINUS '!'
+%nonassoc '[' '.'
 %nonassoc ')' EMPTY
 %nonassoc ELSE
 
@@ -73,7 +79,7 @@ Variable        :	Type IDENTIFIER
 						$$.vdef = new Tree.VarDef($2.ident, $1.type, $2.loc);
 					}
 				;
-				
+
 Type            :	INT
 					{
 						$$.type = new Tree.TypeIdent(Tree.INT, $1.loc);
@@ -130,12 +136,12 @@ FieldList       :	FieldList VariableDef
                 		$$.flist = new ArrayList<Tree>();
                 	}
                 ;
- 
+
 Formals         :	VariableList
                 |	/* empty */
                 	{
                 		$$ = new SemValue();
-                		$$.vlist = new ArrayList<Tree.VarDef>(); 
+                		$$.vlist = new ArrayList<Tree.VarDef>();
                 	}
                 ;
 
@@ -165,7 +171,7 @@ StmtBlock       :	'{' StmtList '}'
 						$$.stmt = new Block($2.slist, $1.loc);
 					}
                 ;
-	
+
 StmtList        :	StmtList Stmt
 					{
 						$$.slist.add($2.stmt);
@@ -181,7 +187,7 @@ Stmt		    :	VariableDef
 					{
 						$$.stmt = $1.vdef;
 					}
-					
+
                 |	SimpleStmt ';'
                 	{
                 		if ($$.stmt == null) {
@@ -189,11 +195,14 @@ Stmt		    :	VariableDef
                 		}
                 	}
                 |	IfStmt
+				|   SwitchStmt
                 |	WhileStmt
                 |	ForStmt
+				|	RepeatStmt ';'
                 |	ReturnStmt ';'
                 |	PrintStmt ';'
                 |	BreakStmt ';'
+                |	ContinueStmt ';'
                 |	StmtBlock
                 ;
 
@@ -216,7 +225,7 @@ Receiver     	:	Expr '.'
                 	{
                 		$$ = new SemValue();
                 	}
-                ; 
+                ;
 
 LValue          :	Receiver IDENTIFIER
 					{
@@ -246,6 +255,14 @@ Expr            :	LValue
 					}
                 |	Call
                 |	Constant
+				|	Expr '?' Expr ':' Expr
+					{
+						$$.expr = new Tree.Ternary(Tree.CONDITIONAL, $1.expr, $3.expr, $5.expr, $2.loc);
+					}
+				|	Expr PCLONE Expr
+					{
+						$$.expr = new Tree.Binary(Tree.PCLONE, $1.expr, $3.expr, $2.loc);
+					}
                 |	Expr '+' Expr
                 	{
                 		$$.expr = new Tree.Binary(Tree.PLUS, $1.expr, $3.expr, $2.loc);
@@ -337,9 +354,9 @@ Expr            :	LValue
                 |	'(' CLASS IDENTIFIER ')' Expr
                 	{
                 		$$.expr = new Tree.TypeCast($3.ident, $5.expr, $5.loc);
-                	} 
+                	}
                 ;
-	
+
 Constant        :	LITERAL
 					{
 						$$.expr = new Tree.Literal($1.typeTag, $1.literal, $1.loc);
@@ -368,7 +385,40 @@ ExprList        :	ExprList ',' Expr
 						$$.elist.add($1.expr);
                 	}
                 ;
-    
+
+CaseStmt        :  CASE Constant ':' StmtList
+					{
+						$$.stmt = new Tree.Case($2.expr, $4.slist, $1.loc);
+					}
+				;
+
+CaseList        :	CaseList CaseStmt
+					{
+						$$.caselist.add((Tree.Case)$2.stmt);
+					}
+                |	/* empty */
+                	{
+                		$$ = new SemValue();
+                		$$.caselist = new ArrayList<Tree.Case>();
+                	}
+                ;
+
+DefaultStmt     :  DEFAULT ':' StmtList
+					{
+						$$.stmt = new Tree.Default($3.slist, $1.loc);
+					}
+				;
+
+SwitchStmt      :	SWITCH '(' Expr ')' '{' CaseList '}'
+					{
+						$$.stmt = new Tree.Switch($3.expr, $6.caselist, $1.loc);
+					}
+				|	SWITCH '(' Expr ')' '{' CaseList DefaultStmt '}'
+					{
+						$$.stmt = new Tree.Switch($3.expr, $6.caselist, $7.stmt, $1.loc);
+					}
+                ;
+
 WhileStmt       :	WHILE '(' Expr ')' Stmt
 					{
 						$$.stmt = new Tree.WhileLoop($3.expr, $5.stmt, $1.loc);
@@ -381,9 +431,21 @@ ForStmt         :	FOR '(' SimpleStmt ';' Expr ';'	SimpleStmt ')' Stmt
 					}
                 ;
 
+RepeatStmt      :   REPEAT Stmt UNTIL '(' Expr ')'
+					{
+						$$.stmt = new Tree.RepeatLoop($2.stmt, $5.expr, $1.loc);
+					}
+				;
+
 BreakStmt       :	BREAK
 					{
 						$$.stmt = new Tree.Break($1.loc);
+					}
+                ;
+
+ContinueStmt    :	CONTINUE
+					{
+						$$.stmt = new Tree.Continue($1.loc);
 					}
                 ;
 
@@ -420,7 +482,7 @@ PrintStmt       :	PRINT '(' ExprList ')'
                 ;
 
 %%
-    
+
 	/**
 	 * 打印当前归约所用的语法规则<br>
 	 * 请勿修改。
@@ -437,7 +499,7 @@ PrintStmt       :	PRINT '(' ExprList ')'
 			System.out.println(rule);
 		return false;
     }
-    
+
     public void diagnose() {
 		addReduceListener(this);
 		yyparse();
